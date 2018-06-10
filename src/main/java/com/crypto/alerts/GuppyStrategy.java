@@ -16,7 +16,7 @@ public class GuppyStrategy {
 
     private static List<Integer> PERIODS = Lists.newArrayList(3, 5, 8, 10, 12, 15, 30, 35, 40, 45, 50, 60);
     private TimeSeries timeSeries;
-    private ClosePriceIndicator closePrice;
+    private static ClosePriceIndicator closePrice;
 
     public GuppyStrategy(TimeSeries timeSeries) {
         this.timeSeries = timeSeries;
@@ -27,25 +27,45 @@ public class GuppyStrategy {
         int currentTrend = getTrend(timeSeries.getBarCount() - 1);
         int previousTrend = getTrend(timeSeries.getBarCount() - 2);
 
-        StringBuffer sb = new StringBuffer(MessageFormat.format("previousTrend = {0}, currentTrend = {1}", previousTrend, currentTrend));
+        String trendMsg;
+        if (currentTrend == previousTrend) {
+            trendMsg = getTrendFromInt(currentTrend);
+        } else {
+            trendMsg = getTrendFromInt(previousTrend) + " -> " + getTrendFromInt(currentTrend);
+        }
+
+        StringBuffer sb = new StringBuffer(trendMsg);
         List<Double> slowerEMAs = getSlowerEMAs(timeSeries.getBarCount() - 1);
         double currentPrice = timeSeries.getBar(timeSeries.getEndIndex()).getClosePrice().doubleValue();
         double minEma = Collections.min(slowerEMAs);
         double maxEma = Collections.max(slowerEMAs);
 
-        if (currentPrice != 0) {
+        if (currentTrend != 0) {
             double slowEma = slowerEMAs.size() > 0 ? slowerEMAs.get(0) : -1;
             double slowestEma = slowerEMAs.size() == 6 ? slowerEMAs.get(5) : -1;
-            sb.append(String.format(" | currentPrice = %.2f, slowEMA = %.2f (%.2f %%), slowestEMA = %.2f (%.2f %%)", currentPrice, slowEma,
+            sb.append(String.format(" | currentPrice = %.6f, slowEMA = %.6f (%.2f %%), slowestEMA = %.6f (%.2f %%)", currentPrice, slowEma,
                     relativePercent(slowEma, currentPrice), slowestEma, relativePercent(slowestEma, currentPrice)));
         } else {
-            sb.append(String.format(" | currentPrice = %.2f, maxEma = %.2f (%.2f age), minEma = %.2f (%.2f ages)", currentPrice, maxEma,
+            sb.append(String.format(" | currentPrice = %.6f, maxEma = %.6f (%.2f %%), minEma = %.6f (%.2f %%)", currentPrice, maxEma,
                     relativePercent(maxEma, currentPrice), minEma, relativePercent(minEma, currentPrice)));
         }
 
         if (isInRange(minEma, maxEma, currentPrice)) sb.append(" | INBETWEEN SLOWER GUPPIES");
 
         return sb.toString();
+    }
+
+    private String getTrendFromInt(int i) {
+        switch (i) {
+            case -1:
+                return "DOWN";
+            case 0:
+                return "COMPRESSING";
+            case 1:
+                return "UP";
+            default:
+                return "NA";
+        }
     }
 
     private double relativePercent(double value, double base) {
@@ -58,12 +78,12 @@ public class GuppyStrategy {
 
     private int getTrend(int index) {
         List<Double> slowerEMAs = getSlowerEMAs(index);
-        if (strictlyIncreasing(slowerEMAs)) return 1;
-        else if (strictlyDecreasing(slowerEMAs)) return -1;
+        if (strictlyIncreasing(slowerEMAs)) return -1;
+        else if (strictlyDecreasing(slowerEMAs)) return 1;
         else return 0;
     }
 
-    private List<Double> getSlowerEMAs(int index) {
+    private static List<Double> getSlowerEMAs(int index) {
         List<Double> guppyValues = Lists.newArrayList();
         for (Integer period : PERIODS) {
             guppyValues.add(new EMAIndicator(closePrice, period).getValue(index).doubleValue());

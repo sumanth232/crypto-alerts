@@ -2,6 +2,7 @@ package com.crypto.alerts;
 
 import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
+import com.binance.api.client.domain.general.Asset;
 import com.binance.api.client.domain.market.Candlestick;
 import com.binance.api.client.domain.market.CandlestickInterval;
 import com.google.common.collect.Lists;
@@ -14,6 +15,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+
+import static com.crypto.alerts.CommonUtil.getClient;
 
 /**
  * @author sumanth on 08/06/18
@@ -55,17 +58,18 @@ public class GuppyAlertTask implements Runnable {
 
     }
 
-    private static BinanceApiRestClient getClient() {
-        BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance();
-        return factory.newRestClient();
+    public static CandlestickInterval getCandleStickInterval(String intervalId) {
+        for(CandlestickInterval interval : CandlestickInterval.values()) {
+            if (interval.getIntervalId().equals(intervalId)) return interval;
+        }
+        return null;
     }
 
     public static void main(String[] args) {
-        String symbol = "BTCUSDT";
-        CandlestickInterval interval = CandlestickInterval.FOUR_HOURLY;
+        String symbol = "BNBUSDT";
+        CandlestickInterval interval = CandlestickInterval.HOURLY;
         BinanceApiRestClient client = getClient();
 
-        long currentTimeMs = System.currentTimeMillis();
 //        int numPriods = 200;
 //        List<Candlestick> candlestickBars = client.getCandlestickBars(symbol, CandlestickInterval.FOUR_HOURLY, numPriods, currentTimeMs - TimeUnit.HOURS.toMillis(numPriods*4), currentTimeMs);
         //List<Candlestick> candlestickBars ; //= client.getCandlestickBars(symbol, CandlestickInterval.FOUR_HOURLY);
@@ -98,11 +102,11 @@ public class GuppyAlertTask implements Runnable {
     /**
      * Initializes the candlestick cache by using the REST API.
      */
-    private static void checkForAlerts(String symbol, CandlestickInterval interval) {
+    public static String checkForAlerts(String symbol, CandlestickInterval interval) {
         BinanceApiRestClient client = getClient();
 
         long currentTimeMs = System.currentTimeMillis();
-        List<Candlestick> candlestickBars = client.getCandlestickBars(symbol, CandlestickInterval.FOUR_HOURLY);
+        List<Candlestick> candlestickBars = client.getCandlestickBars(symbol, interval);
         List<Bar> bars = new ArrayList<>();
         for (Candlestick candle : candlestickBars) {
             ZonedDateTime endZonedTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(candle.getCloseTime()), ZoneId.systemDefault());
@@ -120,5 +124,6 @@ public class GuppyAlertTask implements Runnable {
         GuppyStrategy guppyStrategy = new GuppyStrategy(timeSeries);
         String message = MessageFormat.format("{0}-{1} : {2}", symbol, interval.getIntervalId(), guppyStrategy.evaluate());
         System.out.println(message);
+        return message;
     }
 }
