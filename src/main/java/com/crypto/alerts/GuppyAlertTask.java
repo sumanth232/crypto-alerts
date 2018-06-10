@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.ta4j.core.*;
 
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -117,6 +118,7 @@ public class GuppyAlertTask implements Runnable {
             candlesticksCache.put(candlestickBar.getOpenTime(), candlestickBar);
         }*/
         GuppyStrategy guppyStrategy = new GuppyStrategy(timeSeries);
-        guppyStrategy.evaluate();
+        String message = MessageFormat.format("{0}-{1} : {2}", symbol, interval.getIntervalId(), guppyStrategy.evaluate());
+        System.out.println(message);
     }
 }
