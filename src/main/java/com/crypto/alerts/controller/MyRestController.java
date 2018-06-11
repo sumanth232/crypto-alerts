@@ -18,7 +18,13 @@ public class MyRestController {
 
     @RequestMapping("/")
     public String welcome(Map<String, Object> model) {
-        model.put("result", "YAY");
+        String msg = "REST end points :<br>" +
+                "/guppy/BTCUSDT/4h (available 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 8h, 12h, 1d, 3d, 1w, 1M)<br>" +
+                "/quoteAssets<br>" +
+                "/guppy/quote/USDT/4h<br>" +
+                "----------------------------<br>" +
+                "by sumanth232@gmail.com";
+        model.put("result", msg);
         return "index";
     }
 
