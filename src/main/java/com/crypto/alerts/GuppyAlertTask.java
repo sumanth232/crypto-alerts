@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 
+import static com.crypto.alerts.CommonUtil.candlestickIntervalVsMinutes;
 import static com.crypto.alerts.CommonUtil.getClient;
 
 /**
@@ -23,7 +24,7 @@ import static com.crypto.alerts.CommonUtil.getClient;
  */
 public class GuppyAlertTask implements Runnable {
 
-    private static Map<CandlestickInterval, Integer> candlestickIntervalVsMinutes;
+    /*private static Map<CandlestickInterval, Integer> candlestickIntervalVsMinutes;
 
     private static Map<CandlestickInterval, List<String>> intervalVsSymbol;
     static {
@@ -42,6 +43,16 @@ public class GuppyAlertTask implements Runnable {
 
 
 
+        Map<CandlestickInterval, List<String>> intervalVsSymbolTemp = Maps.newHashMap();
+        intervalVsSymbolTemp.put(CandlestickInterval.ONE_MINUTE, Lists.newArrayList("BTCUSDT, BCCUSDT"));
+        intervalVsSymbolTemp.put(CandlestickInterval.FIVE_MINUTES, Lists.newArrayList("BTCUSDT, BCCUSDT"));
+        intervalVsSymbol = Collections.unmodifiableMap(intervalVsSymbolTemp);
+    }*/
+
+
+    public static Map<CandlestickInterval, List<String>> intervalVsSymbol;
+
+    static {
         Map<CandlestickInterval, List<String>> intervalVsSymbolTemp = Maps.newHashMap();
         intervalVsSymbolTemp.put(CandlestickInterval.ONE_MINUTE, Lists.newArrayList("BTCUSDT, BCCUSDT"));
         intervalVsSymbolTemp.put(CandlestickInterval.FIVE_MINUTES, Lists.newArrayList("BTCUSDT, BCCUSDT"));
