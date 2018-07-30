@@ -5,11 +5,10 @@ import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.general.ExchangeInfo;
 import com.binance.api.client.domain.general.SymbolInfo;
 import com.binance.api.client.domain.general.SymbolStatus;
+import com.binance.api.client.domain.market.Candlestick;
 import com.binance.api.client.domain.market.CandlestickInterval;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.ta4j.core.indicators.EMAIndicator;
-import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 
 import java.util.Collections;
 import java.util.List;
@@ -90,5 +89,28 @@ public class CommonUtil {
         for (int i = 1; i < size; i++)
             if (values.get(i - 1) < values.get(i)) return false;
         return true;
+    }
+
+    // candle results will start coming from the startMs time (if present)
+    public static List<Candlestick> getCandlestickBarsUnlimited(String symbol, CandlestickInterval interval, Integer count, Long startMs, Long endMs) {
+        int batchSize = 1000;
+        List<Candlestick> result = Lists.newArrayList();
+        if (startMs == null && endMs == null) endMs = System.currentTimeMillis();
+        List<Candlestick> partialBars;
+        while (count > 0 && (startMs == null || endMs == null || startMs <= endMs)) {
+            if (count <= batchSize) {
+                partialBars = client.getCandlestickBars(symbol, interval, count, startMs, endMs);
+                count -= batchSize;
+            } else {
+                partialBars = client.getCandlestickBars(symbol, interval, batchSize, startMs, endMs);
+                if (startMs != null) startMs = partialBars.get(partialBars.size() - 1).getCloseTime() + 1;
+                else endMs = partialBars.get(0).getOpenTime() - 1;
+                assert (partialBars.size() == batchSize);
+                count -= batchSize;
+            }
+            if (startMs != null) result.addAll(partialBars);
+            else result.addAll(0, partialBars);
+        }
+        return result;
     }
 }

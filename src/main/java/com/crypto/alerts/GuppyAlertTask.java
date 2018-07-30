@@ -1,8 +1,6 @@
 package com.crypto.alerts;
 
-import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
-import com.binance.api.client.domain.general.Asset;
 import com.binance.api.client.domain.market.Candlestick;
 import com.binance.api.client.domain.market.CandlestickInterval;
 import com.google.common.collect.Lists;
@@ -15,6 +13,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.crypto.alerts.CommonUtil.candlestickIntervalVsMinutes;
 import static com.crypto.alerts.CommonUtil.getClient;
@@ -84,9 +83,14 @@ public class GuppyAlertTask implements Runnable {
 //        int numPriods = 200;
 //        List<Candlestick> candlestickBars = client.getCandlestickBars(symbol, CandlestickInterval.FOUR_HOURLY, numPriods, currentTimeMs - TimeUnit.HOURS.toMillis(numPriods*4), currentTimeMs);
         //List<Candlestick> candlestickBars ; //= client.getCandlestickBars(symbol, CandlestickInterval.FOUR_HOURLY);
-        checkForAlerts(symbol, interval);
+        //checkForAlerts(symbol, interval);
 
-
+        int numPriods = 1010;
+        long endMs = System.currentTimeMillis();
+        long startMs = endMs - TimeUnit.HOURS.toMillis((numPriods)*4);
+        List<Candlestick> candlestickBars = client.getCandlestickBars(symbol, CandlestickInterval.FOUR_HOURLY, numPriods, null, endMs);
+        List<Candlestick> candlestickBarsNew = CommonUtil.getCandlestickBarsUnlimited(symbol, CandlestickInterval.FOUR_HOURLY, numPriods, null, endMs);
+        int  a  =2;
 
         /*List<Bar> bars = new ArrayList<>();
         for (Candlestick candle : candlestickBars) {
@@ -99,7 +103,6 @@ public class GuppyAlertTask implements Runnable {
         EMAIndicator emaIndicator = new EMAIndicator(closePrice, 40);*/
         //Decimal val = emaIndicator.getValue(numPriods-2);
 
-        int a = 2;
     }
 
     private void checkForAlerts() {

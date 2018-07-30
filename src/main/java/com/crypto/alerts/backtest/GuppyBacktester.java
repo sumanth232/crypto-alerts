@@ -3,6 +3,7 @@ package com.crypto.alerts.backtest;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.domain.market.Candlestick;
 import com.binance.api.client.domain.market.CandlestickInterval;
+import com.crypto.alerts.CommonUtil;
 import org.ta4j.core.*;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 
@@ -33,7 +34,7 @@ public class GuppyBacktester {
 
     static int longLeverage = 1;
     static int shortLeverage = 3;
-    final static double intialPortfolioInBTC = 2;
+    final static double intialPortfolioInBTC = 1;
     static double currentPortfolioInBTC = intialPortfolioInBTC;
 
     //private Integer previousCrossOverTrend; // -1 if faster EMAs are below slower EMAs, 1 if faster EMAs are above slower EMAs, 0 otherwise
@@ -45,7 +46,8 @@ public class GuppyBacktester {
     public static void backtest() {
         BinanceApiRestClient client = getClient();
 
-        List<Candlestick> candlestickBars = client.getCandlestickBars(symbol, interval);
+        //List<Candlestick> candlestickBars = client.getCandlestickBars(symbol, interval);
+        List<Candlestick> candlestickBars = CommonUtil.getCandlestickBarsUnlimited(symbol, interval, 2000, null, System.currentTimeMillis());
         List<Bar> bars = new ArrayList<>();
         for (Candlestick candle : candlestickBars) {
             ZonedDateTime endZonedTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(candle.getCloseTime()), ZoneId.systemDefault());
